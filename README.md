@@ -100,7 +100,7 @@ Implementa o algoritmo de **Deep Q-Learning (DQL)** com rede neural para políti
 Implementa o método **Proximal Policy Optimization (PPO)** — um algoritmo de gradiente de política para controle contínuo integrado ao AquaCrop-OSPy.
 
 - **Funcionalidade**:
-  - O agente interage com o ambiente realista (`AquaCropRealEnv`), recebendo estados, recompensas e limites de irrigação.
+  - O agente interage com o ambiente realista (`AquaCropEnv`), recebendo estados, recompensas e limites de irrigação.
   - PPO aprende as redes **ator (política)** e **crítico (valor)** para estabilizar as atualizações.
   - Inclui penalizações por irrigação excessiva em dias chuvosos e bônus por economia de água.
 
@@ -110,10 +110,8 @@ Implementa o método **Proximal Policy Optimization (PPO)** — um algoritmo de 
 
 - **Função de Recompensa**:
   - Recompensa maior produtividade e penaliza excesso de água e estresse hídrico.
-  - Inclui penalidade por chuva (`rain_w=0.02`) e bônus quando o agente evita irrigar em condições adequadas.
+  - Inclui penalidade por chuva e bônus quando o agente evita irrigar em condições adequadas.
 
-- **Hiperparâmetros**:
-  - Taxa de aprendizado = 2e-4, γ = 0.99, λ = 0.95, *clip* = 0.15, *entropy* = 0.05, *batch size* = 32.
 
 - **Saída**:
   - Modelo PPO treinado, com política suave e eficiente que se adapta a diferentes condições climáticas.
