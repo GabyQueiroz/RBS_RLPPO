@@ -1,164 +1,164 @@
-# Este código faz parte do trabalho de Doutorado em Engenharia Elétrica e Informática Industrial (CPGEI - UTFPR)
+# This code is part of the PhD Thesis in Electrical Engineering and Industrial Informatics (CPGEI - UTFPR)
 
-Autores: **G. de Queiroz Pereira**, **D. Paulo Bertrand Renaux** e **A. E. Lazzaretti**  
-Título: **COMPARATIVE ANALYSIS OF REINFORCEMENT LEARNING AND RULE-BASED SYSTEM APPROACHES FOR IRRIGATION IN HORTICULTURE**
-
----
-
-# Estrutura do Projeto
-
-## **1. Arquivo: `RBS-1.py`**
-
-Este arquivo implementa a primeira versão do **Sistema Baseado em Regras (RBS)**, responsável por calcular o cronograma de irrigação com base no balanço hídrico e nos parâmetros da cultura.
-
-- **Funcionalidade**:
-  - Define constantes como textura do solo, tipo de cultura, eficiência de irrigação e coeficientes de cultivo (Kc) por fase.
-  - Calcula as necessidades diárias de irrigação (`IRN` e `ITN`) usando o método de balanço hídrico.
-  - Utiliza dados climáticos (temperatura, precipitação) para calcular a ETo pela equação simplificada de Hargreaves.
-
-- **Principais Funções**:
-  - `calcular_lamina_irrigacao()` — determina a lâmina de irrigação diária e por fase.
-  - `aplicar_regras()` — aplica regras condicionais via *rule engine* para decidir se a irrigação ocorre (ex.: não irrigar se `ITN < 5`, limitar se `ITN > 40`).
-
-- **Saída**:
-  - Gera uma tabela com o cronograma diário de irrigação contendo ETo, ETc, Pe e horário de irrigação.
+Authors: **G. de Queiroz Pereira**, **D. Paulo Bertrand Renaux** and **A. E. Lazzaretti**  
+Title: **COMPARATIVE ANALYSIS OF REINFORCEMENT LEARNING AND RULE-BASED SYSTEM APPROACHES FOR IRRIGATION IN HORTICULTURE**
 
 ---
 
-## **2. Arquivo: `RBS-2.py`**
+# Project Structure
 
-Versão avançada do **Sistema Baseado em Regras (RBS)**, integrando dados dinâmicos de sensores e previsões meteorológicas.
+## **1. File: `RBS-1.py`**
 
-- **Funcionalidade**:
-  - Estende o RBS básico integrando dados de **previsão** e **sensor** para decisões em tempo real.
-  - Usa a biblioteca `rule_engine` para aplicar regras lógicas (ex.: temperatura do solo e do ar).
-  - Permite análises por hora, oferecendo maior resolução temporal para o controle da irrigação.
+This file implements the first version of the **Rule-Based System (RBS)**, responsible for calculating the irrigation schedule based on the water balance and crop parameters.
 
-- **Integração de Dados**:
-  - Lê arquivos como `dados_clima.txt` e `dados_sensor.txt`.
-  - Combina medições reais de sensores (umidade, temperatura, umidade relativa) com previsões diárias.
+- **Functionality**:
+  - Defines constants such as soil texture, crop type, irrigation efficiency, and crop coefficients (Kc) by growth stage.
+  - Calculates daily irrigation requirements (`IRN` and `ITN`) using the water balance method.
+  - Uses climate data (temperature, precipitation) to calculate ETo using the simplified Hargreaves equation.
 
-- **Lógica de Decisão**:
-  - Ajusta automaticamente o volume de irrigação.
-  - Considera fatores como temperatura elevada ou solo seco para aplicar irrigações adicionais.
+- **Main Functions**:
+  - `calcular_lamina_irrigacao()` — determines the daily and stage-based irrigation depth.
+  - `aplicar_regras()` — applies conditional rules via a rule engine to decide whether irrigation occurs (e.g., do not irrigate if `ITN < 5`, limit if `ITN > 40`).
 
-- **Saída**:
-  - Relatório diário com volume de irrigação ajustado, condições ambientais e explicações qualitativas das decisões.
+- **Output**:
+  - Generates a table with the daily irrigation schedule containing ETo, ETc, Pe, and irrigation time.
 
 ---
 
-## **3. Arquivo: `RL-QL.py`**
+## **2. File: `RBS-2.py`**
 
-Implementa o algoritmo de **Q-Learning (QL)** integrado ao modelo AquaCrop-OSPy.
+Advanced version of the **Rule-Based System (RBS)**, integrating dynamic sensor data and weather forecasts.
 
-- **Funcionalidade**:
-  - O ambiente utiliza dados climáticos diários (`MinTemp`, `MaxTemp`, `Precipitation`, `ReferenceET`) como variáveis de estado.
-  - O agente de Q-Learning aprende políticas de irrigação que maximizam a produtividade e a eficiência no uso da água.
-  - As recompensas são obtidas por meio da simulação no AquaCrop, considerando o rendimento final da cultura.
+- **Functionality**:
+  - Extends the basic RBS by integrating **forecast** and **sensor** data for real-time decisions.
+  - Uses the `rule_engine` library to apply logical rules (e.g., soil and air temperature).
+  - Allows hourly analysis, providing higher temporal resolution for irrigation control.
 
-- **Arquitetura**:
-  - Classe `Agent`: define a Q-Table, a política *epsilon-greedy* e a atualização de Bellman.
-  - Função `run_aquacrop_slice()`: executa a simulação AquaCrop em cada episódio e calcula o retorno (rendimento seco).
+- **Data Integration**:
+  - Reads files such as `dados_clima.txt` and `dados_sensor.txt`.
+  - Combines actual sensor measurements (moisture, temperature, relative humidity) with daily forecasts.
 
-- **Etapas de Treinamento**:
-  1. Carrega os dados climáticos de `dados_DV.xlsx`.
-  2. Executa simulações do AquaCrop para cada episódio.
-  3. Atualiza os valores de Q com base na produtividade e penalizações por desperdício de água.
+- **Decision Logic**:
+  - Automatically adjusts the irrigation volume.
+  - Considers factors such as high temperature or dry soil to apply additional irrigation.
 
-- **Saída**:
-  - Gera valores Q treinados e métricas de desempenho por episódio.
-
----
-
-## **4. Arquivo: `RL-DQL.py`**
-
-Implementa o algoritmo de **Deep Q-Learning (DQL)** com rede neural para políticas contínuas de irrigação.
-
-- **Funcionalidade**:
-  - Substitui a Q-Table discreta por uma rede neural (`DQN`) para aproximação de função.
-  - Aprende políticas não lineares complexas e generalizáveis para diferentes cenários climáticos.
-  - Cada estado contém informações sobre precipitação, ET₀, estágio fenológico e umidade.
-
-- **Estrutura da Rede**:
-  - Camadas totalmente conectadas com ativações ReLU (128–128 neurônios).
-  - Otimização via Adam e função de perda MSE.
-
-- **Processo de Aprendizado**:
-  - Utiliza *replay memory* (`deque`) para estabilizar o treinamento.
-  - A exploração diminui progressivamente com a redução de `epsilon`.
-
-- **Integração**:
-  - O ambiente interage com o AquaCrop para obter o rendimento seco (`Dry yield (tonne/ha)`), que gera a recompensa.
-
-- **Saída**:
-  - Modelo profundo (`DQN`) treinado, capaz de estimar o volume ótimo de irrigação diária.
+- **Output**:
+  - Daily report with adjusted irrigation volume, environmental conditions, and qualitative explanations of decisions.
 
 ---
 
-## **5. Arquivo: `RL-PPO.py`**
+## **3. File: `RL-QL.py`**
 
-Implementa o método **Proximal Policy Optimization (PPO)** — um algoritmo de gradiente de política para controle contínuo integrado ao AquaCrop-OSPy.
+Implements the **Q-Learning (QL)** algorithm integrated with the AquaCrop-OSPy model.
 
-- **Funcionalidade**:
-  - O agente interage com o ambiente realista (`AquaCropEnv`), recebendo estados, recompensas e limites de irrigação.
-  - PPO aprende as redes **ator (política)** e **crítico (valor)** para estabilizar as atualizações.
-  - Inclui penalizações por irrigação excessiva em dias chuvosos e bônus por economia de água.
+- **Functionality**:
+  - The environment uses daily climate data (`MinTemp`, `MaxTemp`, `Precipitation`, `ReferenceET`) as state variables.
+  - The Q-Learning agent learns irrigation policies that maximize productivity and water use efficiency.
+  - Rewards are obtained through AquaCrop simulation, considering final crop yield.
 
-- **Componentes do Modelo**:
-  - **ActorNetwork**: gera a média e desvio padrão da quantidade de irrigação.
-  - **CriticNetwork**: estima o valor do estado para o cálculo da vantagem.
+- **Architecture**:
+  - `Agent` class: defines the Q-Table, epsilon-greedy policy, and Bellman update.
+  - `run_aquacrop_slice()` function: runs the AquaCrop simulation in each episode and calculates the return (dry yield).
 
-- **Função de Recompensa**:
-  - Recompensa maior produtividade e penaliza excesso de água e estresse hídrico.
-  - Inclui penalidade por chuva e bônus quando o agente evita irrigar em condições adequadas.
+- **Training Steps**:
+  1. Loads climate data from `dados_DV.xlsx`.
+  2. Runs AquaCrop simulations for each episode.
+  3. Updates Q-values based on productivity and penalties for water waste.
 
-
-- **Saída**:
-  - Modelo PPO treinado, com política suave e eficiente que se adapta a diferentes condições climáticas.
-
----
-
-## **6. Arquivo: `irrigation_soil.py`**
-
-Integra o AquaCrop para calcular a irrigação com base na **umidade do solo**.
-
-- **Funcionalidade**:
-  - Monitora o armazenamento de água no solo e calcula o percentual de umidade em relação à capacidade de campo (`FC`) e ao ponto de murcha (`PWP`).
-  - Define camadas de solo e parâmetros de cultura personalizados.
-  - Gera gráficos da evolução da umidade e fluxos de água no solo.
-
-- **Saída**:
-- Gráficos e tabelas com variação da umidade, lâminas aplicadas e balanço hídrico.
-
-
-## **7. Arquivo: `CompareProductivity.py`**
-
-Realiza a comparação entre as estratégias **RBS** e **RL** utilizando simulações do AquaCrop-OSPy.
-
-- **Funcionalidade**:
-- Carrega os cronogramas de irrigação gerados pelos métodos RBS e RL.
-- Executa simulações no AquaCrop para ambas as estratégias e calcula:
-  - Produtividade fresca
-  - Produtividade seca
-  - Produtividade potencial
-  - Irrigação total sazonal (mm)
-
-- **Etapas**:
-1. Insere os valores de irrigação diária na matriz `ITN` do AquaCrop.
-2. Executa as simulações para cada método sob as mesmas condições climáticas.
-3. Gera gráficos de produtividade versus uso de água.
-
-- **Saída**:
-- Relatório consolidado comparando:
-  - Eficiência do RL.
-  - Economia de água em relação ao RBS.
-  - Resposta produtiva ao volume de irrigação aplicado.
+- **Output**:
+  - Trained Q-values and performance metrics per episode.
 
 ---
 
-# **Requisitos do Projeto**
+## **4. File: `RL-DQL.py`**
 
-Para executar os experimentos:
+Implements the **Deep Q-Learning (DQL)** algorithm with a neural network for continuous irrigation policies.
+
+- **Functionality**:
+  - Replaces the discrete Q-Table with a neural network (`DQN`) for function approximation.
+  - Learns complex, non-linear, and generalizable policies for different climate scenarios.
+  - Each state contains information about precipitation, ET₀, phenological stage, and soil moisture.
+
+- **Network Structure**:
+  - Fully connected layers with ReLU activations (128–128 neurons).
+  - Optimization via Adam and MSE loss function.
+
+- **Learning Process**:
+  - Uses replay memory (`deque`) to stabilize training.
+  - Exploration decreases progressively with `epsilon` decay.
+
+- **Integration**:
+  - The environment interacts with AquaCrop to obtain dry yield (`Dry yield (tonne/ha)`), which generates the reward.
+
+- **Output**:
+  - Trained deep model (`DQN`) capable of estimating the optimal daily irrigation volume.
+
+---
+
+## **5. File: `RL-PPO.py`**
+
+Implements the **Proximal Policy Optimization (PPO)** method — a policy gradient algorithm for continuous control integrated with AquaCrop-OSPy.
+
+- **Functionality**:
+  - The agent interacts with the realistic environment (`AquaCropEnv`), receiving states, rewards, and irrigation limits.
+  - PPO learns **actor (policy)** and **critic (value)** networks to stabilize updates.
+  - Includes penalties for excessive irrigation on rainy days and bonuses for water savings.
+
+- **Model Components**:
+  - **ActorNetwork**: generates the mean and standard deviation of the irrigation amount.
+  - **CriticNetwork**: estimates the state value for advantage calculation.
+
+- **Reward Function**:
+  - Rewards higher productivity and penalizes excess water and water stress.
+  - Includes a penalty for rain and a bonus when the agent avoids irrigating under adequate conditions.
+
+- **Output**:
+  - Trained PPO model with a smooth and efficient policy that adapts to different climate conditions.
+
+---
+
+## **6. File: `irrigation_soil.py`**
+
+Integrates AquaCrop to calculate irrigation based on **soil moisture**.
+
+- **Functionality**:
+  - Monitors soil water storage and calculates moisture percentage relative to field capacity (`FC`) and permanent wilting point (`PWP`).
+  - Defines custom soil layers and crop parameters.
+  - Generates graphs of moisture evolution and soil water fluxes.
+
+- **Output**:
+  - Graphs and tables with moisture variation, applied depths, and water balance.
+
+---
+
+## **7. File: `CompareProductivity.py`**
+
+Performs the comparison between **RBS** and **RL** strategies using AquaCrop-OSPy simulations.
+
+- **Functionality**:
+  - Loads the irrigation schedules generated by the RBS and RL methods.
+  - Runs AquaCrop simulations for both strategies and calculates:
+    - Fresh yield
+    - Dry yield
+    - Potential yield
+    - Seasonal total irrigation (mm)
+
+- **Steps**:
+  1. Inserts the daily irrigation values into AquaCrop's `ITN` matrix.
+  2. Runs the simulations for each method under the same climate conditions.
+  3. Generates productivity versus water use graphs.
+
+- **Output**:
+  - Consolidated report comparing:
+    - RL efficiency.
+    - Water savings relative to RBS.
+    - Productive response to the applied irrigation volume.
+
+---
+
+# Project Requirements
+
+To run the experiments:
 
 ```bash
 pip install aquacrop gym numpy pandas torch matplotlib seaborn rule-engine openpyxl
